@@ -12,6 +12,11 @@
 - Do not commit unless asked.
 - Do not amend, force-push, or rewrite history unless asked.
 
+## Checks
+
+- Before commit: `task lint` and `task test`.
+- End of a change-set: `task check` (full gate).
+
 ## Notes
 
 - Do not invent URLs or expand scope beyond the request.

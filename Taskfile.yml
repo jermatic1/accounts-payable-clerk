@@ -1,0 +1,56 @@
+version: "3"
+
+use_gitignore: true
+
+tasks:
+  init:
+    desc: Install runtime dependencies
+    method: checksum
+    sources:
+      - uv.lock
+      - pyproject.toml
+    generates:
+      - .venv/.task-uv-sync
+    cmds:
+      - uv sync --no-dev --inexact
+      - touch .venv/.task-uv-sync
+
+  init:dev:
+    desc: Install runtime + dev tools (pytest, ruff, basedpyright)
+    method: checksum
+    sources:
+      - uv.lock
+      - pyproject.toml
+    generates:
+      - .venv/.task-uv-sync-dev
+    cmds:
+      - uv sync
+      - touch .venv/.task-uv-sync-dev
+
+  lint:
+    desc: Ruff lint, ruff format check, and basedpyright
+    deps: [init:dev]
+    cmds:
+      - uv run ruff check .
+      - uv run ruff format --check .
+      - uv run basedpyright
+
+  format:
+    desc: Auto-fix lint issues and format code
+    deps: [init:dev]
+    cmds:
+      - uv run ruff check --fix .
+      - uv run ruff format .
+
+  test:
+    desc: Run tests
+    deps: [init:dev]
+    cmds:
+      - uv run pytest || [ $? -eq 5 ]
+
+  check:
+    desc: Full gate — lint + tests
+    deps: [init:dev]
+    cmds:
+      - task: lint
+      - uv run pytest || [ $? -eq 5 ]
