@@ -9,10 +9,11 @@ tasks:
     sources:
       - uv.lock
       - pyproject.toml
+      - tools/*/pyproject.toml
     generates:
       - .venv/.task-uv-sync
     cmds:
-      - uv sync --no-dev --inexact
+      - uv sync --all-packages --no-dev --inexact
       - touch .venv/.task-uv-sync
 
   init:dev:
@@ -21,10 +22,11 @@ tasks:
     sources:
       - uv.lock
       - pyproject.toml
+      - tools/*/pyproject.toml
     generates:
       - .venv/.task-uv-sync-dev
     cmds:
-      - uv sync
+      - uv sync --all-packages
       - touch .venv/.task-uv-sync-dev
 
   lint:
@@ -33,7 +35,7 @@ tasks:
     cmds:
       - uv run ruff check .
       - uv run ruff format --check .
-      - uv run basedpyright
+      - uv run basedpyright --warnings
 
   format:
     desc: Auto-fix lint issues and format code
@@ -54,3 +56,9 @@ tasks:
     cmds:
       - task: lint
       - uv run pytest || [ $? -eq 5 ]
+
+  generate-invoices:
+    desc: Generate invoice PDF fixtures from vendors/POs
+    deps: [init:dev]
+    cmds:
+      - uv run --package invoice-generator generate-invoices

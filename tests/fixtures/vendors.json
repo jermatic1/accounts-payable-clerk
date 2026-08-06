@@ -1,0 +1,202 @@
+[
+  {
+    "vendor_id": "V001",
+    "vendor_name": "Summit Plumbing Supply",
+    "street": "1420 Industrial Pkwy",
+    "city": "Grand Rapids",
+    "state": "MI",
+    "zip": "49503",
+    "phone": "(616) 555-0101",
+    "website": "https://www.summitplumbingsupply.com"
+  },
+  {
+    "vendor_id": "V002",
+    "vendor_name": "Apex Electric Components",
+    "street": "880 Commerce Dr",
+    "city": "Kalamazoo",
+    "state": "MI",
+    "zip": "49001",
+    "phone": "(269) 555-0102",
+    "website": "https://www.apexelectriccomp.com"
+  },
+  {
+    "vendor_id": "V003",
+    "vendor_name": "Harbor Pipe & Fitting Co",
+    "street": "55 Lakeshore Blvd",
+    "city": "Muskegon",
+    "state": "MI",
+    "zip": "49441",
+    "phone": "(231) 555-0103",
+    "website": "https://www.harborpipefitting.com"
+  },
+  {
+    "vendor_id": "V004",
+    "vendor_name": "VoltLine Electrical Wholesale",
+    "street": "3100 Tech Center Rd",
+    "city": "Ann Arbor",
+    "state": "MI",
+    "zip": "48108",
+    "phone": "(734) 555-0104",
+    "website": "https://www.voltlinewholesale.com"
+  },
+  {
+    "vendor_id": "V005",
+    "vendor_name": "Cascade Plumbing Parts",
+    "street": "772 River Rd",
+    "city": "Holland",
+    "state": "MI",
+    "zip": "49423",
+    "phone": "(616) 555-0105",
+    "website": "https://www.cascadeplumbingparts.com"
+  },
+  {
+    "vendor_id": "V006",
+    "vendor_name": "IronCurrent Electric Supply",
+    "street": "1901 Faraday Ave",
+    "city": "Flint",
+    "state": "MI",
+    "zip": "48503",
+    "phone": "(810) 555-0106",
+    "website": "https://www.ironcurrentelectric.com"
+  },
+  {
+    "vendor_id": "V007",
+    "vendor_name": "Midwest Valve & Hydronics",
+    "street": "4600 Logistics Way",
+    "city": "Lansing",
+    "state": "MI",
+    "zip": "48910",
+    "phone": "(517) 555-0107",
+    "website": "https://www.midwestvalvehydronics.com"
+  },
+  {
+    "vendor_id": "V008",
+    "vendor_name": "SparkRight Electrical Distributors",
+    "street": "225 Circuit Ct",
+    "city": "Troy",
+    "state": "MI",
+    "zip": "48083",
+    "phone": "(248) 555-0108",
+    "website": "https://www.sparkrightdist.com"
+  },
+  {
+    "vendor_id": "V009",
+    "vendor_name": "BlueRidge Plumbing Distributors",
+    "street": "98 Oak Ridge Ln",
+    "city": "Traverse City",
+    "state": "MI",
+    "zip": "49684",
+    "phone": "(231) 555-0109",
+    "website": "https://www.blueridgeplumbingdist.com"
+  },
+  {
+    "vendor_id": "V010",
+    "vendor_name": "GridPath Electric Solutions",
+    "street": "1500 Powerline Rd",
+    "city": "Saginaw",
+    "state": "MI",
+    "zip": "48601",
+    "phone": "(989) 555-0110",
+    "website": "https://www.gridpathelectric.com"
+  },
+  {
+    "vendor_id": "V011",
+    "vendor_name": "Premier Fixture & Supply",
+    "street": "670 Warehouse Blvd",
+    "city": "Battle Creek",
+    "state": "MI",
+    "zip": "49015",
+    "phone": "(269) 555-0111",
+    "website": "https://www.premierfixturesupply.com"
+  },
+  {
+    "vendor_id": "V012",
+    "vendor_name": "CopperCore Pipe Works",
+    "street": "33 Mill Creek Dr",
+    "city": "Jackson",
+    "state": "MI",
+    "zip": "49201",
+    "phone": "(517) 555-0112",
+    "website": "https://www.coppercorepipeworks.com"
+  },
+  {
+    "vendor_id": "V013",
+    "vendor_name": "NorthStar Electrical Parts",
+    "street": "4200 Aurora Pkwy",
+    "city": "Marquette",
+    "state": "MI",
+    "zip": "49855",
+    "phone": "(906) 555-0113",
+    "website": "https://www.northstarelectricalparts.com"
+  },
+  {
+    "vendor_id": "V014",
+    "vendor_name": "FlowMaster Plumbing Wholesale",
+    "street": "1850 Gauge St",
+    "city": "Port Huron",
+    "state": "MI",
+    "zip": "48060",
+    "phone": "(810) 555-0114",
+    "website": "https://www.flowmasterplumbing.com"
+  },
+  {
+    "vendor_id": "V015",
+    "vendor_name": "AmpForge Electric Co",
+    "street": "910 Conductor Ave",
+    "city": "Dearborn",
+    "state": "MI",
+    "zip": "48126",
+    "phone": "(313) 555-0115",
+    "website": "https://www.ampforgeelectric.com"
+  },
+  {
+    "vendor_id": "V016",
+    "vendor_name": "Evergreen Hydronic Supply",
+    "street": "240 Pinecrest Rd",
+    "city": "Petoskey",
+    "state": "MI",
+    "zip": "49770",
+    "phone": "(231) 555-0116",
+    "website": "https://www.evergreenhydronic.com"
+  },
+  {
+    "vendor_id": "V017",
+    "vendor_name": "BrightCircuit Supply House",
+    "street": "77 Lumen Dr",
+    "city": "Rochester Hills",
+    "state": "MI",
+    "zip": "48309",
+    "phone": "(248) 555-0117",
+    "website": "https://www.brightcircuitsupply.com"
+  },
+  {
+    "vendor_id": "V018",
+    "vendor_name": "SteelStream Plumbing Inc",
+    "street": "1120 Forge Rd",
+    "city": "Warren",
+    "state": "MI",
+    "zip": "48089",
+    "phone": "(586) 555-0118",
+    "website": "https://www.steelstreamplumbing.com"
+  },
+  {
+    "vendor_id": "V019",
+    "vendor_name": "DynoWatt Electrical Merchants",
+    "street": "3600 Dynamo Way",
+    "city": "Midland",
+    "state": "MI",
+    "zip": "48640",
+    "phone": "(989) 555-0119",
+    "website": "https://www.dynowattelectrical.com"
+  },
+  {
+    "vendor_id": "V020",
+    "vendor_name": "AquaLink Parts & Service",
+    "street": "505 Springwell Ct",
+    "city": "Bay City",
+    "state": "MI",
+    "zip": "48708",
+    "phone": "(989) 555-0120",
+    "website": "https://www.aqualinkparts.com"
+  }
+]

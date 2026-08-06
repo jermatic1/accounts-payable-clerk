@@ -1,0 +1,140 @@
+[
+  {
+    "purchase_order_id": "P0001001",
+    "vendor_id": "V001",
+    "order_date": "2026-01-15",
+    "lines": [
+      {
+        "line_number": 1,
+        "description": "Copper fittings assortment - 1/2 in to 2 in",
+        "quantity": 50,
+        "unit_price": 12.50,
+        "amount": 625.00
+      },
+      {
+        "line_number": 2,
+        "description": "PEX tubing roll - 100 ft",
+        "quantity": 10,
+        "unit_price": 89.00,
+        "amount": 890.00
+      },
+      {
+        "line_number": 3,
+        "description": "Ball valves - brass 3/4 in",
+        "quantity": 25,
+        "unit_price": 18.75,
+        "amount": 468.75
+      }
+    ],
+    "total_amount": 1983.75
+  },
+  {
+    "purchase_order_id": "P0001002",
+    "vendor_id": "V004",
+    "order_date": "2026-02-03",
+    "lines": [
+      {
+        "line_number": 1,
+        "description": "Electrical conduit - EMT 1 in x 10 ft",
+        "quantity": 40,
+        "unit_price": 22.00,
+        "amount": 880.00
+      },
+      {
+        "line_number": 2,
+        "description": "THHN wire - 12 AWG black 500 ft spool",
+        "quantity": 6,
+        "unit_price": 145.50,
+        "amount": 873.00
+      }
+    ],
+    "total_amount": 1753.00
+  },
+  {
+    "purchase_order_id": "P0001003",
+    "vendor_id": "V007",
+    "order_date": "2026-02-18",
+    "lines": [
+      {
+        "line_number": 1,
+        "description": "Expansion tank - 5 gallon hydronic",
+        "quantity": 8,
+        "unit_price": 67.25,
+        "amount": 538.00
+      },
+      {
+        "line_number": 2,
+        "description": "Circulator pump - wet rotor",
+        "quantity": 4,
+        "unit_price": 215.00,
+        "amount": 860.00
+      },
+      {
+        "line_number": 3,
+        "description": "Zone valve actuator assembly",
+        "quantity": 12,
+        "unit_price": 54.50,
+        "amount": 654.00
+      },
+      {
+        "line_number": 4,
+        "description": "Pressure relief valve - 150 PSI",
+        "quantity": 15,
+        "unit_price": 28.00,
+        "amount": 420.00
+      }
+    ],
+    "total_amount": 2472.00
+  },
+  {
+    "purchase_order_id": "P0001004",
+    "vendor_id": "V015",
+    "order_date": "2026-03-05",
+    "lines": [
+      {
+        "line_number": 1,
+        "description": "Contactor - 40A 3-pole",
+        "quantity": 20,
+        "unit_price": 36.80,
+        "amount": 736.00
+      },
+      {
+        "line_number": 2,
+        "description": "Terminal block kit",
+        "quantity": 30,
+        "unit_price": 9.45,
+        "amount": 283.50
+      },
+      {
+        "line_number": 3,
+        "description": "Control transformer - 120/24V 40VA",
+        "quantity": 10,
+        "unit_price": 41.20,
+        "amount": 412.00
+      }
+    ],
+    "total_amount": 1431.50
+  },
+  {
+    "purchase_order_id": "P0001005",
+    "vendor_id": "V014",
+    "order_date": "2026-03-22",
+    "lines": [
+      {
+        "line_number": 1,
+        "description": "Dielectric unions - 1 in",
+        "quantity": 60,
+        "unit_price": 14.25,
+        "amount": 855.00
+      },
+      {
+        "line_number": 2,
+        "description": "Flexible water heater connector - 3/4 in x 18 in",
+        "quantity": 40,
+        "unit_price": 11.90,
+        "amount": 476.00
+      }
+    ],
+    "total_amount": 1331.00
+  }
+]
