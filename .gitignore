@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Tool caches
+.pytest_cache/
+.ruff_cache/
+.task/
+.vsjet/
+
+# Virtual environments
+.venv
+
+# Secrets / local env — all config variants except the committed example
+.env

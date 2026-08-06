@@ -1,0 +1,8 @@
+[project]
+name = "accounts-payable-clerk"
+version = "0.1.0"
+description = "Accounts payable invoice processing"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+dependencies = []
