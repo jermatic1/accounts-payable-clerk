@@ -15,5 +15,6 @@ wheels/
 # Virtual environments
 .venv
 
-# Secrets / local env — all config variants except the committed example
-.env
+# Local config
+config*.toml
+!config.example.toml

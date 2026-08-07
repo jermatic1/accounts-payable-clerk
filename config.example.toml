@@ -1,0 +1,17 @@
+# Copy to config.toml and edit. config.toml is gitignored (may contain secrets).
+
+[masters]
+vendors = "tests/fixtures/vendors.json"
+purchase_orders = "tests/fixtures/purchase-orders.json"
+
+[vlm]
+api_key = "replace-me"
+base_url = "http://127.0.0.1:8000/v1"
+model = "my-vision-model"
+# timeout_seconds = 120
+
+[matching]
+threshold = 85.0
+margin = 5.0
+# vendor_threshold = 85.0
+# po_threshold = 85.0
