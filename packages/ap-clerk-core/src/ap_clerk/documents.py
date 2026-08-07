@@ -68,12 +68,12 @@ def load_invoice(path: Path) -> LoadedInvoice:
 
 def _render_pdf_first_page(path: Path) -> tuple[bytes, int]:
     try:
-        import fitz  # type: ignore[import-untyped]
+        import pymupdf  # type: ignore[import-untyped]
     except ImportError as exc:
         raise APClerkError("pymupdf is required to render PDF invoices") from exc
 
     try:
-        doc = fitz.open(path)
+        doc = pymupdf.open(path)
     except Exception as exc:
         raise APClerkError(f"unreadable PDF: {path}: {exc}") from exc
 
@@ -83,7 +83,7 @@ def _render_pdf_first_page(path: Path) -> tuple[bytes, int]:
             raise APClerkError(f"PDF has no pages: {path}")
         page = doc.load_page(0)
         zoom = RENDER_DPI / 72.0
-        pix = page.get_pixmap(matrix=fitz.Matrix(zoom, zoom), alpha=False)
+        pix = page.get_pixmap(matrix=pymupdf.Matrix(zoom, zoom), alpha=False)
         png_bytes = pix.tobytes("png")
     except APClerkError:
         raise

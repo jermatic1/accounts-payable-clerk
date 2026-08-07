@@ -24,3 +24,18 @@ task test
 # lint + tests (run before merging a change-set)
 task check
 ```
+
+## Packages
+
+| Package | Import | Role |
+|---------|--------|------|
+| `packages/ap-clerk-core` | `ap_clerk` | Domain library |
+| `packages/ap-clerk-cli` | `ap_clerk_cli` | Thin CLI frontend |
+
+```bash
+cp config.example.toml config.toml
+# edit api_key, base_url, model, masters paths
+
+task extract-invoice -- extract path/to/invoice.pdf
+# or: uv run --package ap-clerk-cli ap-clerk extract path/to/invoice.pdf
+```
