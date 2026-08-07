@@ -11,7 +11,7 @@ dependencies = []
 package = false
 
 [tool.uv.workspace]
-members = ["tools/*"]
+members = ["packages/*", "tools/*"]
 
 [dependency-groups]
 dev = [
@@ -26,15 +26,17 @@ addopts = "--import-mode=importlib"
 
 [tool.ruff]
 src = [
+    "packages/*/src",
     "tools/invoice-generator/src",
     "tests",
 ]
+extend-exclude = ["poc", "plans"]
 
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F", "I", "UP", "B"]
 
 [tool.basedpyright]
-include = ["tools", "tests"]
+include = ["packages", "tools", "tests"]
 exclude = ["**/__pycache__", "**/.venv", ".venv"]
 typeCheckingMode = "standard"
 reportMissingTypeStubs = "warning"

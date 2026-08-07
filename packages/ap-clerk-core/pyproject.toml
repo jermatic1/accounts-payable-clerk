@@ -1,0 +1,18 @@
+[project]
+name = "ap-clerk-core"
+version = "0.1.0"
+description = "Accounts payable invoice processing core library"
+requires-python = ">=3.12"
+dependencies = [
+    "openai>=1.40",
+    "pydantic>=2.0",
+    "pymupdf>=1.24",
+    "rapidfuzz>=3.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ap_clerk"]

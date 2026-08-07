@@ -9,6 +9,7 @@ tasks:
     sources:
       - uv.lock
       - pyproject.toml
+      - packages/*/pyproject.toml
       - tools/*/pyproject.toml
     generates:
       - .venv/.task-uv-sync
@@ -22,6 +23,7 @@ tasks:
     sources:
       - uv.lock
       - pyproject.toml
+      - packages/*/pyproject.toml
       - tools/*/pyproject.toml
     generates:
       - .venv/.task-uv-sync-dev
@@ -57,8 +59,15 @@ tasks:
       - task: lint
       - uv run pytest || [ $? -eq 5 ]
 
+  extract-invoice:
+    desc: Extract invoice data via ap-clerk CLI
+    deps: [init:dev]
+    cmds:
+      - uv run --package ap-clerk-cli ap-clerk {{.CLI_ARGS}}
+
   generate-invoices:
     desc: Generate invoice PDF fixtures from vendors/POs
     deps: [init:dev]
     cmds:
       - uv run --package invoice-generator generate-invoices
+
