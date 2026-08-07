@@ -31,7 +31,7 @@ VENDORS_PATH = FIXTURES / "vendors.json"
 POS_PATH = FIXTURES / "purchase-orders.json"
 
 
-def _fixture_masters() -> tuple[list[Vendor], list[PurchaseOrder]]:
+def _fixture_reference_data() -> tuple[list[Vendor], list[PurchaseOrder]]:
     return load_vendors(VENDORS_PATH), load_purchase_orders(POS_PATH)
 
 
@@ -49,7 +49,7 @@ def _good_extraction(**overrides: object) -> dict[str, object]:
 
 
 def test_process_exact_auto_approve() -> None:
-    vendors, pos = _fixture_masters()
+    vendors, pos = _fixture_reference_data()
     result = process_extraction(
         _good_extraction(),
         vendors=vendors,
@@ -70,7 +70,7 @@ def test_process_exact_auto_approve() -> None:
 
 
 def test_process_ocr_typo_auto_approve() -> None:
-    vendors, pos = _fixture_masters()
+    vendors, pos = _fixture_reference_data()
     result = process_extraction(
         _good_extraction(
             vendor_name_raw="Summit Plumbng Supply",
@@ -206,7 +206,7 @@ def test_process_vendor_po_mismatch_via_pipeline_fields() -> None:
 
 
 def test_process_missing_po() -> None:
-    vendors, pos = _fixture_masters()
+    vendors, pos = _fixture_reference_data()
     result = process_extraction(
         _good_extraction(purchase_order_raw=None, purchase_order_variants=[]),
         vendors=vendors,
@@ -220,7 +220,7 @@ def test_process_missing_po() -> None:
 
 
 def test_process_math_fail_despite_good_names() -> None:
-    vendors, pos = _fixture_masters()
+    vendors, pos = _fixture_reference_data()
     result = process_extraction(
         _good_extraction(subtotal=1983.75, tax_total=0.0, total_amount=1900.0),
         vendors=vendors,
@@ -235,7 +235,7 @@ def test_process_math_fail_despite_good_names() -> None:
 
 
 def test_process_line_sum_mismatch_distinct_from_math() -> None:
-    vendors, pos = _fixture_masters()
+    vendors, pos = _fixture_reference_data()
     result = process_extraction(
         _good_extraction(
             subtotal=1983.75,
@@ -258,7 +258,7 @@ def test_process_line_sum_mismatch_distinct_from_math() -> None:
 
 
 def test_process_line_sum_ok_continues_to_match() -> None:
-    vendors, pos = _fixture_masters()
+    vendors, pos = _fixture_reference_data()
     result = process_extraction(
         _good_extraction(
             line_items=[
@@ -275,7 +275,7 @@ def test_process_line_sum_ok_continues_to_match() -> None:
 
 
 def test_process_no_line_amounts_skips_line_sum() -> None:
-    vendors, pos = _fixture_masters()
+    vendors, pos = _fixture_reference_data()
     result = process_extraction(
         _good_extraction(line_items=[{"description": "x"}]),
         vendors=vendors,
@@ -314,7 +314,7 @@ def test_process_separate_vendor_po_thresholds() -> None:
 
 
 def test_process_totals_incomplete() -> None:
-    vendors, pos = _fixture_masters()
+    vendors, pos = _fixture_reference_data()
     result = process_extraction(
         {"subtotal": 100.0, "vendor_name_raw": "Summit Plumbing Supply"},
         vendors=vendors,
@@ -326,7 +326,7 @@ def test_process_totals_incomplete() -> None:
 
 
 def test_process_schema_invalid() -> None:
-    vendors, pos = _fixture_masters()
+    vendors, pos = _fixture_reference_data()
     result = process_extraction(
         {"subtotal": "not-a-number", "total_amount": 10.0},
         vendors=vendors,
@@ -340,7 +340,7 @@ def test_process_schema_invalid() -> None:
 
 
 def test_process_result_json_stable() -> None:
-    vendors, pos = _fixture_masters()
+    vendors, pos = _fixture_reference_data()
     result = process_extraction(
         _good_extraction(),
         vendors=vendors,
