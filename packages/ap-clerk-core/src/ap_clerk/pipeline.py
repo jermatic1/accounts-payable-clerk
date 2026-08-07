@@ -5,6 +5,7 @@ from typing import Any, Final, Literal
 
 from pydantic import BaseModel, ValidationError
 
+from ap_clerk.documents import LoadedInvoice
 from ap_clerk.extraction import InvoiceExtraction, check_line_sum, check_math
 from ap_clerk.matching import (
     DEFAULT_MATCH_MARGIN,
@@ -16,6 +17,7 @@ from ap_clerk.matching import (
 )
 from ap_clerk.purchase_orders import PurchaseOrder
 from ap_clerk.vendors import Vendor
+from ap_clerk.vlm import InvoiceExtractor
 
 STATUS_AUTO_APPROVED: Final = "AUTO_APPROVED"
 STATUS_HUMAN_REVIEW: Final = "HUMAN_REVIEW"
@@ -53,6 +55,31 @@ def _has_po_text(extraction: InvoiceExtraction) -> bool:
     if extraction.purchase_order_raw and extraction.purchase_order_raw.strip():
         return True
     return any(v.strip() for v in extraction.purchase_order_variants if v)
+
+
+def process_invoice(
+    loaded: LoadedInvoice,
+    *,
+    extractor: InvoiceExtractor,
+    vendors: Sequence[Vendor],
+    purchase_orders: Sequence[PurchaseOrder],
+    match_threshold: float = DEFAULT_MATCH_THRESHOLD,
+    match_margin: float = DEFAULT_MATCH_MARGIN,
+    vendor_threshold: float | None = None,
+    po_threshold: float | None = None,
+) -> PipelineResult:
+    raw = extractor.extract_invoice(loaded.image, mime=loaded.mime)
+    return process_extraction(
+        raw,
+        vendors=vendors,
+        purchase_orders=purchase_orders,
+        source_file=str(loaded.source_path),
+        match_threshold=match_threshold,
+        match_margin=match_margin,
+        vendor_threshold=vendor_threshold,
+        po_threshold=po_threshold,
+        page_count=loaded.page_count,
+    )
 
 
 def process_extraction(
