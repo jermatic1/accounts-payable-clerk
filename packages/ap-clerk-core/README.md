@@ -17,7 +17,7 @@ uv sync --all-packages
 | Module | Role |
 |--------|------|
 | `config` | `Config`, `load_config` from `config.toml` |
-| `documents` | `LoadedInvoice`, `load_invoice` (single image / first PDF page) |
+| `documents` | `LoadedInvoice`, `load_invoice` (first PDF page rendered to PNG) |
 | `errors` | `APClerkError`, `ExtractionError` |
 | `extraction` | `InvoiceExtraction`, `LineItem`, math / line-sum checks |
 | `matching` | Vendor and purchase-order fuzzy match |

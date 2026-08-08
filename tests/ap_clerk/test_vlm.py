@@ -43,11 +43,10 @@ def _good_extraction(**overrides: object) -> dict[str, object]:
 
 
 def _loaded(
-    image: bytes = b"fake-png-bytes", source: str = "page.png"
+    image: bytes = b"fake-png-bytes", source: str = "page.pdf"
 ) -> LoadedInvoice:
     return LoadedInvoice(
         image=image,
-        mime="image/png",
         page_count=1,
         source_path=Path(source),
     )
@@ -64,10 +63,8 @@ def test_fake_extractor_process_invoice_auto_approve() -> None:
         purchase_orders=pos,
     )
     assert result.status == STATUS_AUTO_APPROVED
-    assert result.source_file == "page.png"
-    assert len(extractor.calls) == 1
-    assert extractor.calls[0][0] == b"fake-png-bytes"
-    assert extractor.calls[0][1] == "image/png"
+    assert result.source_file == "page.pdf"
+    assert extractor.calls == [b"fake-png-bytes"]
     assert isinstance(result.payload.extraction, InvoiceExtraction)
 
 
@@ -108,7 +105,7 @@ def test_extraction_instructions_require_verbatim_variants() -> None:
 
 
 def test_build_extraction_messages_embeds_data_url() -> None:
-    messages = build_extraction_messages(b"\x89PNG", mime="image/png")
+    messages = build_extraction_messages(b"\x89PNG")
     assert messages[0]["role"] == "system"
     user = messages[1]
     assert user["role"] == "user"

@@ -47,9 +47,7 @@ Rules:
 
 @runtime_checkable
 class InvoiceExtractor(Protocol):
-    def extract_invoice(
-        self, image: bytes, *, mime: str = "image/png"
-    ) -> dict[str, Any]: ...
+    def extract_invoice(self, image: bytes) -> dict[str, Any]: ...
 
 
 class FakeInvoiceExtractor:
@@ -61,12 +59,10 @@ class FakeInvoiceExtractor:
     ) -> None:
         self._result = dict(result) if result is not None else {}
         self._error = error
-        self.calls: list[tuple[bytes, str]] = []
+        self.calls: list[bytes] = []
 
-    def extract_invoice(
-        self, image: bytes, *, mime: str = "image/png"
-    ) -> dict[str, Any]:
-        self.calls.append((image, mime))
+    def extract_invoice(self, image: bytes) -> dict[str, Any]:
+        self.calls.append(image)
         if self._error is not None:
             raise self._error
         return dict(self._result)
@@ -75,7 +71,6 @@ class FakeInvoiceExtractor:
 def build_extraction_messages(
     image: bytes,
     *,
-    mime: str = "image/png",
     reinforce_json: bool = False,
 ) -> list[dict[str, Any]]:
     if not image:
@@ -98,7 +93,7 @@ def build_extraction_messages(
     content.append(
         {
             "type": "image_url",
-            "image_url": {"url": f"data:{mime};base64,{b64}"},
+            "image_url": {"url": f"data:image/png;base64,{b64}"},
         }
     )
     return [
@@ -162,11 +157,9 @@ class VisionInvoiceExtractor:
     def base_url(self) -> str:
         return self._base_url
 
-    def extract_invoice(
-        self, image: bytes, *, mime: str = "image/png"
-    ) -> dict[str, Any]:
+    def extract_invoice(self, image: bytes) -> dict[str, Any]:
         started = time.perf_counter()
-        messages = build_extraction_messages(image, mime=mime)
+        messages = build_extraction_messages(image)
         content = self._complete(messages)
         try:
             result = parse_extraction_response(content)
@@ -175,9 +168,7 @@ class VisionInvoiceExtractor:
                 "vlm parse failed; retrying once with JSON-only reinforcement model=%s",
                 self._model,
             )
-            retry_messages = build_extraction_messages(
-                image, mime=mime, reinforce_json=True
-            )
+            retry_messages = build_extraction_messages(image, reinforce_json=True)
             content = self._complete(retry_messages)
             try:
                 result = parse_extraction_response(content)

@@ -42,7 +42,7 @@ def build_parser() -> argparse.ArgumentParser:
     extract.add_argument(
         "invoice_path",
         type=Path,
-        help="Path to invoice image or PDF",
+        help="Path to invoice PDF",
     )
     extract.add_argument(
         "-o",

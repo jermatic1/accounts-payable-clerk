@@ -17,39 +17,20 @@ INVOICE_PDF = FIXTURES / "invoices" / "V001_P0001001.pdf"
 VENDORS_PATH = FIXTURES / "vendors.json"
 POS_PATH = FIXTURES / "purchase-orders.json"
 
-_MIN_PNG = (
-    b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01"
-    b"\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\x0f\x00"
-    b"\x00\x01\x01\x00\x05\x18\xd8N\x00\x00\x00\x00IEND\xaeB`\x82"
-)
-
 
 def test_load_invoice_pdf_fixture() -> None:
     loaded = load_invoice(INVOICE_PDF)
     assert loaded.page_count >= 1
     assert loaded.image[:8] == b"\x89PNG\r\n\x1a\n"
     assert len(loaded.image) > 100
-    assert loaded.mime == "image/png"
     assert loaded.source_path == INVOICE_PDF
 
 
-def test_load_invoice_png(tmp_path: Path) -> None:
+def test_load_non_pdf_rejected(tmp_path: Path) -> None:
     path = tmp_path / "page.png"
-    path.write_bytes(_MIN_PNG)
-    loaded = load_invoice(path)
-    assert loaded.page_count == 1
-    assert loaded.image == _MIN_PNG
-    assert loaded.mime == "image/png"
-    assert loaded.source_path == path
-
-
-def test_load_invoice_jpeg_mime(tmp_path: Path) -> None:
-    path = tmp_path / "scan.jpg"
-    path.write_bytes(b"\xff\xd8\xfffake-jpeg")
-    loaded = load_invoice(path)
-    assert loaded.page_count == 1
-    assert len(loaded.image) == len(b"\xff\xd8\xfffake-jpeg")
-    assert loaded.mime == "image/jpeg"
+    path.write_bytes(b"\x89PNG\r\n\x1a\nfake")
+    with pytest.raises(APClerkError, match="unsupported"):
+        load_invoice(path)
 
 
 def test_load_missing_file(tmp_path: Path) -> None:
@@ -106,6 +87,4 @@ def test_fake_extractor_with_real_pdf_render_json_shape() -> None:
     assert "vendor_match" in dumped["payload"]
     assert "po_match" in dumped["payload"]
 
-    assert len(extractor.calls) == 1
-    assert extractor.calls[0][0] == loaded.image
-    assert extractor.calls[0][1] == "image/png"
+    assert extractor.calls == [loaded.image]

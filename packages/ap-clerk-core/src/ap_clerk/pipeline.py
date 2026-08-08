@@ -68,7 +68,7 @@ def process_invoice(
     vendor_threshold: float | None = None,
     po_threshold: float | None = None,
 ) -> PipelineResult:
-    raw = extractor.extract_invoice(loaded.image, mime=loaded.mime)
+    raw = extractor.extract_invoice(loaded.image)
     return process_extraction(
         raw,
         vendors=vendors,

@@ -7,23 +7,10 @@ from ap_clerk.errors import APClerkError
 
 RENDER_DPI = 150
 
-SUPPORTED_IMAGE_SUFFIXES = frozenset({".png", ".jpg", ".jpeg", ".webp"})
-SUPPORTED_PDF_SUFFIXES = frozenset({".pdf"})
-SUPPORTED_SUFFIXES = SUPPORTED_IMAGE_SUFFIXES | SUPPORTED_PDF_SUFFIXES
-
-_MIME_BY_SUFFIX = {
-    ".png": "image/png",
-    ".jpg": "image/jpeg",
-    ".jpeg": "image/jpeg",
-    ".webp": "image/webp",
-    ".pdf": "image/png",
-}
-
 
 @dataclass(frozen=True)
 class LoadedInvoice:
     image: bytes
-    mime: str
     page_count: int
     source_path: Path
 
@@ -33,37 +20,11 @@ def load_invoice(path: Path) -> LoadedInvoice:
         raise APClerkError(f"file not found: {path}")
     if not path.is_file():
         raise APClerkError(f"not a file: {path}")
-
-    suffix = path.suffix.lower()
-    if suffix not in SUPPORTED_SUFFIXES:
-        raise APClerkError(
-            f"unsupported invoice format {suffix!r}; "
-            f"expected one of {sorted(SUPPORTED_SUFFIXES)}"
-        )
-
-    mime = _MIME_BY_SUFFIX[suffix]
-
-    if suffix in SUPPORTED_IMAGE_SUFFIXES:
-        try:
-            data = path.read_bytes()
-        except OSError as exc:
-            raise APClerkError(f"could not read image: {exc}") from exc
-        if not data:
-            raise APClerkError(f"empty image file: {path}")
-        return LoadedInvoice(
-            image=data,
-            mime=mime,
-            page_count=1,
-            source_path=path,
-        )
+    if path.suffix.lower() != ".pdf":
+        raise APClerkError(f"unsupported invoice format {path.suffix!r}; expected .pdf")
 
     image, page_count = _render_pdf_first_page(path)
-    return LoadedInvoice(
-        image=image,
-        mime=mime,
-        page_count=page_count,
-        source_path=path,
-    )
+    return LoadedInvoice(image=image, page_count=page_count, source_path=path)
 
 
 def _render_pdf_first_page(path: Path) -> tuple[bytes, int]:
