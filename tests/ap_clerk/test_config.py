@@ -113,7 +113,7 @@ def test_unknown_key(tmp_path: Path) -> None:
         extra = true
         """,
     )
-    with pytest.raises(ConfigError, match="unknown key"):
+    with pytest.raises(ConfigError, match="vlm.extra"):
         load_config(cfg_path)
 
 
