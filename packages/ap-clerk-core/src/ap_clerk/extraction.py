@@ -1,3 +1,9 @@
+"""Models for the raw fields transcribed from an invoice page.
+
+Everything is optional and as-printed; nothing here is validated or
+trusted. Downstream checks and matching decide what to believe.
+"""
+
 from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -13,6 +19,8 @@ class LineItem(BaseModel):
 
 
 class UnmappedField(BaseModel):
+    """Labeled value printed on the page that fits no schema field."""
+
     model_config = ConfigDict(extra="ignore")
 
     label: str | None = None
@@ -20,6 +28,8 @@ class UnmappedField(BaseModel):
 
 
 class InvoiceExtraction(BaseModel):
+    """A claim about an invoice — what the model read, before any check has vouched for it."""
+
     model_config = ConfigDict(extra="ignore")
 
     vendor_name_raw: str | None = None

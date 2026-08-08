@@ -1,3 +1,10 @@
+"""Fuzzy-match extracted vendor and purchase order text against reference data.
+
+A match is confident when its score clears the threshold and beats the
+runner-up by the margin. Identifiers are opaque strings — no format
+assumptions anywhere.
+"""
+
 from __future__ import annotations
 
 import re
@@ -35,6 +42,8 @@ class MatchCandidate(BaseModel):
 
 
 class VendorMatch(BaseModel):
+    """`confident` is the routing signal; `margin` is the top-1 vs top-2 score gap (None when only one candidate scored)."""
+
     vendor_id: str | None = None
     vendor_name: str | None = None
     score: float | None = None
@@ -44,6 +53,8 @@ class VendorMatch(BaseModel):
 
 
 class PurchaseOrderMatch(BaseModel):
+    """`confident` is the routing signal; `margin` is the top-1 vs top-2 score gap (None when only one candidate scored)."""
+
     purchase_order_id: str | None = None
     vendor_id: str | None = None
     score: float | None = None
@@ -170,6 +181,8 @@ def match_purchase_order(
     if not queries:
         return PurchaseOrderMatch()
 
+    # A confident vendor shrinks the pool: fewer ids to collide with, and
+    # wrong-vendor matches become impossible.
     if vendor_id is not None:
         pool = [po for po in purchase_orders if po.vendor_id == vendor_id]
     else:

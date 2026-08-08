@@ -1,3 +1,5 @@
+"""Load an invoice PDF and render its first page to a PNG for extraction."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -7,11 +9,14 @@ import pymupdf  # type: ignore[import-untyped]
 
 from ap_clerk.errors import APClerkError
 
+# PDFs have no inherent resolution; this sets the rendered pixel density.
 RENDER_DPI = 150
 
 
 @dataclass(frozen=True)
 class LoadedInvoice:
+    """First page rendered to PNG; page_count covers the whole document."""
+
     image: bytes
     page_count: int
     source_path: Path

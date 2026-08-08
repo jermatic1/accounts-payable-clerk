@@ -1,3 +1,9 @@
+"""Turn an invoice page image into raw extraction fields with a vision model.
+
+The model only transcribes the page — it never sees reference data, so it
+cannot invent a vendor or purchase order id.
+"""
+
 from __future__ import annotations
 
 import base64
@@ -48,10 +54,14 @@ Rules:
 
 @runtime_checkable
 class InvoiceExtractor(Protocol):
+    """What the pipeline needs from an extractor: one page image in, extraction dict out."""
+
     def extract_invoice(self, image: bytes) -> dict[str, Any]: ...
 
 
 class FakeInvoiceExtractor:
+    """Test double: returns a fixed dict (or raises) and records every call."""
+
     def __init__(
         self,
         result: dict[str, Any] | None = None,
@@ -126,6 +136,15 @@ def parse_extraction_response(content: str) -> dict[str, Any]:
 
 
 class VisionInvoiceExtractor:
+    """Production extractor for OpenAI-compatible vision chat endpoints.
+
+    Requests json_object output rather than a schema-constrained response:
+    grammar-guided decoding has silently nulled fields on some endpoints.
+    Transient errors (429/5xx) retry with backoff; a response that fails to
+    parse triggers one JSON-only reinforcement retry; a server that rejects
+    response_format falls back to a plain completion.
+    """
+
     def __init__(
         self,
         *,

@@ -1,3 +1,8 @@
+"""Purchase order reference records and their JSON loader.
+
+Shapes follow the fixture exports until real master data lands.
+"""
+
 from __future__ import annotations
 
 import json

@@ -1,3 +1,5 @@
+"""Load and validate config.toml into a resolved Config."""
+
 from __future__ import annotations
 
 import tomllib
@@ -50,6 +52,8 @@ class _ConfigFile(BaseModel):
 
 @dataclass(frozen=True)
 class Config:
+    """Fully resolved settings: paths absolute, thresholds defaulted, nothing optional."""
+
     vendors_path: Path
     purchase_orders_path: Path
     api_key: str
@@ -64,6 +68,11 @@ class Config:
 
 
 def load_config(path: Path | None = None) -> Config:
+    """Load an explicit path, or ./config.toml when none is given.
+
+    Relative paths inside the file resolve against the config file's own
+    directory. There is no environment-variable fallback.
+    """
     if path is None:
         path = Path.cwd() / "config.toml"
         if not path.is_file():

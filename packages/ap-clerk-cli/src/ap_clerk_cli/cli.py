@@ -1,3 +1,8 @@
+"""Command-line frontend: parse arguments, load config, run the pipeline, print JSON.
+
+Arguments are per-run only; durable settings belong in config.toml.
+"""
+
 from __future__ import annotations
 
 import argparse

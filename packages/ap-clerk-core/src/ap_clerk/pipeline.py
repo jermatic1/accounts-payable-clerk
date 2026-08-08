@@ -1,3 +1,9 @@
+"""Route an extraction to AUTO_APPROVED, HUMAN_REVIEW, or REJECTED.
+
+Owns every status, reason code, and validation gate — when an invoice does
+not auto-approve, the answer is in this file.
+"""
+
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -36,6 +42,7 @@ REASON_AUTO_APPROVED = "AUTO_APPROVED"
 
 PipelineStatus = Literal["AUTO_APPROVED", "HUMAN_REVIEW", "REJECTED"]
 
+# Cents-level works because these checks compare a document against itself.
 MATH_TOLERANCE = 0.02
 
 
@@ -74,6 +81,8 @@ class ResultPayload(BaseModel):
 
 
 class PipelineResult(BaseModel):
+    """The JSON contract printed by the CLI; field names are stable for future frontends."""
+
     status: PipelineStatus
     reason: str
     source_file: str | None = None
@@ -151,6 +160,7 @@ def process_extraction(
     po_threshold: float | None = None,
     page_count: int | None = None,
 ) -> PipelineResult:
+    """Dict-only entry point: the test seam that needs no vision model."""
     resolved_vendor_threshold = (
         vendor_threshold if vendor_threshold is not None else match_threshold
     )

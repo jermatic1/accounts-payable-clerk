@@ -2,7 +2,11 @@ from __future__ import annotations
 
 
 class APClerkError(Exception):
-    """Operator-visible library failure with a clear message."""
+    """Base for failures whose message is safe to show an operator.
+
+    Wrap external causes with `raise ... from exc`; never wrap unexpected
+    bugs — let those traceback.
+    """
 
 
 class ExtractionError(APClerkError):
