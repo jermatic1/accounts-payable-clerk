@@ -6,9 +6,35 @@ Responsibilities:
 
 ## Example
 
-A scanned invoice with handwritten fields (click for full size):
+A scanned invoice with handwritten fields, and the extraction result using
+Gemma4 12b:
 
-<a href="docs/example-invoice.jpg"><img src="docs/example-invoice.jpg" alt="Scanned example invoice with handwritten purchase order and amounts" width="400"></a>
+<table align="center">
+<tr>
+<td><a href="docs/example-invoice.jpg"><img src="docs/example-invoice.jpg" alt="Scanned example invoice with handwritten purchase order and amounts" width="240"></a></td>
+<td valign="top">
+<strong>Vendor:</strong> Cascade Plumbing Parts<br>
+<strong>Invoice #:</strong> P0001010<br>
+<strong>Invoice date:</strong> 7-8-26<br>
+<strong>Due date:</strong> 5-8-26<br>
+<strong>Terms:</strong> 30<br>
+<strong>Purchase order:</strong> P0001010<br>
+<br>
+<strong>Line item:</strong><br>
+Teflon Tape 1/2 in — $34.50<br>
+<br>
+<strong>Total:</strong> $34.50
+</td>
+</tr>
+</table>
+
+The vendor fuzzy-matched to master record `V005` (score 100), the purchase
+order was found and belongs to that vendor, and the line items sum to the
+total — so the invoice is routed `AUTO_APPROVED`.
+
+There were 2 issues with this extraction: the handwritten invoice date is
+`4-8-26` but was extracted as `7-8-26`, and the invoice number `I P0001010`
+lost its `I` prefix.
 
 ```bash
 task extract-invoice -- extract tests/fixtures/scanned-invoices/inv-scan-06.pdf
@@ -18,23 +44,6 @@ The vision model transcribes the page (including the handwritten PO number and
 line item), totals are cross-checked, and the vendor and purchase order are
 fuzzy-matched against master data. Scanned fixtures pair with
 `tests/fixtures/purchase-orders-manual.json`.
-
-### Result: ✅ `AUTO_APPROVED`
-
-| Field | Extracted | Matched |
-|-------|-----------|---------|
-| Vendor | Cascade Plumbing Parts | **V005** · Cascade Plumbing Parts · score 100 |
-| Purchase order | P0001010 | **P0001010** · belongs to V005 ✓ · score 100 |
-| Invoice # | P0001010 | |
-| Invoice date | 7-8-26 | |
-| Terms / due date | 30 / 5-8-26 | |
-
-| Description | Amount |
-|-------------|-------:|
-| Teflon Tape 1/2 in | 34.50 |
-| **Total** | **$34.50** |
-
-Math check ✓ (subtotal + tax = total) · line sum ✓ · vendor ↔ PO consistent ✓
 
 <details>
 <summary>Full JSON output</summary>
@@ -134,8 +143,8 @@ Math check ✓ (subtotal + tax = total) · line sum ✓ · vendor ↔ PO consist
 
 </details>
 
-Extraction is transcription-only — OCR noise stays as printed (note the misread
-handwritten date). Matching, math checks, and routing decide `AUTO_APPROVED` /
+Extraction is transcription-only — OCR noise stays as printed (hence the
+misreads noted above). Matching, math checks, and routing decide `AUTO_APPROVED` /
 `HUMAN_REVIEW` / `REJECTED` downstream, and anything the schema does not cover
 lands in `unmapped_fields`.
 
