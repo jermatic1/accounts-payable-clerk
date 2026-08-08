@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+import pymupdf  # type: ignore[import-untyped]
+
 from ap_clerk.errors import APClerkError
 
 RENDER_DPI = 150
@@ -28,11 +30,6 @@ def load_invoice(path: Path) -> LoadedInvoice:
 
 
 def _render_pdf_first_page(path: Path) -> tuple[bytes, int]:
-    try:
-        import pymupdf  # type: ignore[import-untyped]
-    except ImportError as exc:
-        raise APClerkError("pymupdf is required to render PDF invoices") from exc
-
     try:
         doc = pymupdf.open(path)
     except Exception as exc:

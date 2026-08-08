@@ -6,6 +6,7 @@ import logging
 import time
 from typing import Any, Protocol, runtime_checkable
 
+from openai import OpenAI
 from pydantic import ValidationError
 
 from ap_clerk.errors import ExtractionError
@@ -141,8 +142,6 @@ class VisionInvoiceExtractor:
         if client is not None:
             self._client = client
         else:
-            from openai import OpenAI
-
             self._client = OpenAI(
                 api_key=api_key,
                 base_url=base_url,
