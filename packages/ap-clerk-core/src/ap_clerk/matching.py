@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable, Sequence
+from typing import NamedTuple
 
 from pydantic import BaseModel, Field
 from rapidfuzz import fuzz, process
@@ -57,6 +58,45 @@ def normalize(text: str) -> str:
     return " ".join(s.split())
 
 
+class _Ranked(NamedTuple):
+    key: str
+    score: float
+    gap: float | None
+    candidates: list[tuple[str, float]]
+    confident: bool
+
+
+def _match(
+    queries: Sequence[str],
+    labels: Sequence[str],
+    keys: Sequence[str],
+    *,
+    threshold: float,
+    margin: float,
+    top_n: int,
+) -> _Ranked | None:
+    """Best fuzzy match of any query against labels; keys[i] identifies labels[i].
+
+    Confident means the best score reached the threshold and, when more than one
+    key scored, the top-1 vs top-2 gap reached the margin.
+    """
+    best: dict[str, float] = {}
+    for query in queries:
+        matches = process.extract(query, labels, scorer=fuzz.QRatio, limit=len(labels))
+        for _label, score, idx in matches:
+            key = keys[idx]
+            if float(score) > best.get(key, 0.0):
+                best[key] = float(score)
+    if not best:
+        return None
+
+    ranked = sorted(best.items(), key=lambda item: (-item[1], item[0]))
+    top_key, top_score = ranked[0]
+    gap = ranked[0][1] - ranked[1][1] if len(ranked) > 1 else None
+    confident = top_score >= threshold and (gap is None or gap >= margin)
+    return _Ranked(top_key, top_score, gap, ranked[:top_n], confident)
+
+
 def _unique_queries(
     raw_values: Sequence[str | None], normalizer: Normalizer
 ) -> list[str]:
@@ -73,77 +113,6 @@ def _unique_queries(
     return out
 
 
-def _vendor_queries(extraction: InvoiceExtraction, normalizer: Normalizer) -> list[str]:
-    return _unique_queries(
-        [extraction.vendor_name_raw, *extraction.vendor_name_variants],
-        normalizer,
-    )
-
-
-def _po_queries(extraction: InvoiceExtraction, normalizer: Normalizer) -> list[str]:
-    return _unique_queries(
-        [extraction.purchase_order_raw, *extraction.purchase_order_variants],
-        normalizer,
-    )
-
-
-def _best_scores_by_key(
-    queries: Sequence[str],
-    labels: Sequence[str],
-    keys: Sequence[str],
-) -> dict[str, float]:
-    best: dict[str, float] = {}
-    if not queries or not labels:
-        return best
-
-    for query in queries:
-        for label, key in zip(labels, keys, strict=True):
-            if query == label:
-                prev = best.get(key, 0.0)
-                if prev < 100.0:
-                    best[key] = 100.0
-
-        extracted = process.extract(
-            query,
-            labels,
-            scorer=fuzz.QRatio,
-            limit=len(labels),
-        )
-        for _match_label, score, idx in extracted:
-            key = keys[idx]
-            score_f = float(score)
-            prev = best.get(key, 0.0)
-            if score_f > prev:
-                best[key] = score_f
-    return best
-
-
-def _rank_scores(scores: dict[str, float]) -> list[tuple[str, float]]:
-    return sorted(scores.items(), key=lambda item: (-item[1], item[0]))
-
-
-def _margin(ranked: Sequence[tuple[str, float]]) -> float | None:
-    if not ranked:
-        return None
-    if len(ranked) == 1:
-        return None
-    return float(ranked[0][1] - ranked[1][1])
-
-
-def _is_confident(
-    score: float | None,
-    margin: float | None,
-    *,
-    threshold: float,
-    match_margin: float,
-) -> bool:
-    if score is None or score < threshold:
-        return False
-    if margin is None:
-        return True
-    return margin >= match_margin
-
-
 def match_vendor(
     extraction: InvoiceExtraction,
     vendors: Sequence[Vendor],
@@ -153,39 +122,35 @@ def match_vendor(
     top_n: int = 3,
     normalizer: Normalizer = normalize,
 ) -> VendorMatch:
-    queries = _vendor_queries(extraction, normalizer)
+    queries = _unique_queries(
+        [extraction.vendor_name_raw, *extraction.vendor_name_variants], normalizer
+    )
     if not queries or not vendors:
         return VendorMatch()
 
-    labels = [normalizer(v.vendor_name) for v in vendors]
-    keys = [v.vendor_id for v in vendors]
     by_id = {v.vendor_id: v for v in vendors}
-
-    scores = _best_scores_by_key(queries, labels, keys)
-    ranked = _rank_scores(scores)
-    if not ranked:
+    ranked = _match(
+        queries,
+        labels=[normalizer(v.vendor_name) for v in vendors],
+        keys=[v.vendor_id for v in vendors],
+        threshold=threshold,
+        margin=margin,
+        top_n=top_n,
+    )
+    if ranked is None:
         return VendorMatch()
 
-    best_id, best_score = ranked[0]
-    best = by_id[best_id]
-    gap = _margin(ranked)
-    candidates = [
-        MatchCandidate(
-            id=vid,
-            name=by_id[vid].vendor_name,
-            score=score,
-        )
-        for vid, score in ranked[:top_n]
-    ]
+    best = by_id[ranked.key]
     return VendorMatch(
         vendor_id=best.vendor_id,
         vendor_name=best.vendor_name,
-        score=best_score,
-        margin=gap,
-        confident=_is_confident(
-            best_score, gap, threshold=threshold, match_margin=margin
-        ),
-        candidates=candidates,
+        score=ranked.score,
+        margin=ranked.gap,
+        confident=ranked.confident,
+        candidates=[
+            MatchCandidate(id=key, name=by_id[key].vendor_name, score=score)
+            for key, score in ranked.candidates
+        ],
     )
 
 
@@ -199,7 +164,9 @@ def match_purchase_order(
     top_n: int = 3,
     normalizer: Normalizer = normalize,
 ) -> PurchaseOrderMatch:
-    queries = _po_queries(extraction, normalizer)
+    queries = _unique_queries(
+        [extraction.purchase_order_raw, *extraction.purchase_order_variants], normalizer
+    )
     if not queries:
         return PurchaseOrderMatch()
 
@@ -207,37 +174,30 @@ def match_purchase_order(
         pool = [po for po in purchase_orders if po.vendor_id == vendor_id]
     else:
         pool = list(purchase_orders)
-
     if not pool:
         return PurchaseOrderMatch()
 
-    labels = [normalizer(po.purchase_order_id) for po in pool]
-    keys = [po.purchase_order_id for po in pool]
     by_id = {po.purchase_order_id: po for po in pool}
-
-    scores = _best_scores_by_key(queries, labels, keys)
-    ranked = _rank_scores(scores)
-    if not ranked:
+    ranked = _match(
+        queries,
+        labels=[normalizer(po.purchase_order_id) for po in pool],
+        keys=[po.purchase_order_id for po in pool],
+        threshold=threshold,
+        margin=margin,
+        top_n=top_n,
+    )
+    if ranked is None:
         return PurchaseOrderMatch()
 
-    best_id, best_score = ranked[0]
-    best = by_id[best_id]
-    gap = _margin(ranked)
-    candidates = [
-        MatchCandidate(
-            id=pid,
-            name=pid,
-            score=score,
-        )
-        for pid, score in ranked[:top_n]
-    ]
+    best = by_id[ranked.key]
     return PurchaseOrderMatch(
         purchase_order_id=best.purchase_order_id,
         vendor_id=best.vendor_id,
-        score=best_score,
-        margin=gap,
-        confident=_is_confident(
-            best_score, gap, threshold=threshold, match_margin=margin
-        ),
-        candidates=candidates,
+        score=ranked.score,
+        margin=ranked.gap,
+        confident=ranked.confident,
+        candidates=[
+            MatchCandidate(id=key, name=key, score=score)
+            for key, score in ranked.candidates
+        ],
     )
