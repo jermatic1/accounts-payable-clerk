@@ -72,10 +72,6 @@ class FakeInvoiceExtractor:
         return dict(self._result)
 
 
-def extraction_json_schema() -> dict[str, Any]:
-    return InvoiceExtraction.model_json_schema()
-
-
 def build_extraction_messages(
     image: bytes,
     *,
@@ -171,7 +167,7 @@ class VisionInvoiceExtractor:
     ) -> dict[str, Any]:
         started = time.perf_counter()
         messages = build_extraction_messages(image, mime=mime)
-        content = self._complete(messages, use_json_schema=True)
+        content = self._complete(messages)
         try:
             result = parse_extraction_response(content)
         except (json.JSONDecodeError, ValidationError, ExtractionError):
@@ -182,7 +178,7 @@ class VisionInvoiceExtractor:
             retry_messages = build_extraction_messages(
                 image, mime=mime, reinforce_json=True
             )
-            content = self._complete(retry_messages, use_json_schema=False)
+            content = self._complete(retry_messages)
             try:
                 result = parse_extraction_response(content)
             except (json.JSONDecodeError, ValidationError) as exc:
@@ -198,42 +194,15 @@ class VisionInvoiceExtractor:
         )
         return result
 
-    def _response_format(self) -> dict[str, Any]:
-        return {
-            "type": "json_schema",
-            "json_schema": {
-                "name": "invoice_extraction",
-                "schema": extraction_json_schema(),
-            },
-        }
-
-    def _complete(
-        self,
-        messages: list[dict[str, Any]],
-        *,
-        use_json_schema: bool,
-    ) -> str:
+    def _complete(self, messages: list[dict[str, Any]]) -> str:
         kwargs: dict[str, Any] = {
             "model": self._model,
             "messages": messages,
         }
-        if use_json_schema:
-            try:
-                return self._create_with_retry(
-                    **kwargs, response_format=self._response_format()
-                )
-            except Exception as exc:
-                if not _is_response_format_error(exc):
-                    raise
-                logger.info(
-                    "vlm json_schema response_format unsupported; falling back to prompt JSON"
-                )
-        prompt_kwargs = {
-            **kwargs,
-            "response_format": {"type": "json_object"},
-        }
         try:
-            return self._create_with_retry(**prompt_kwargs)
+            return self._create_with_retry(
+                **kwargs, response_format={"type": "json_object"}
+            )
         except Exception as exc:
             if not _is_response_format_error(exc):
                 raise

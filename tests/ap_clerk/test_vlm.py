@@ -21,7 +21,6 @@ from ap_clerk.vlm import (
     FakeInvoiceExtractor,
     VisionInvoiceExtractor,
     build_extraction_messages,
-    extraction_json_schema,
     parse_extraction_response,
 )
 
@@ -126,13 +125,6 @@ def test_build_extraction_messages_requires_image() -> None:
         build_extraction_messages(b"")
 
 
-def test_extraction_json_schema_has_core_fields() -> None:
-    schema = extraction_json_schema()
-    assert "properties" in schema
-    assert "vendor_name_raw" in schema["properties"]
-    assert "purchase_order_variants" in schema["properties"]
-
-
 def test_parse_extraction_response_plain_and_fenced() -> None:
     payload = _good_extraction()
     plain = parse_extraction_response(json.dumps(payload))
@@ -198,7 +190,7 @@ def test_vision_extractor_parses_with_injected_client() -> None:
     assert fake.chat.completions.calls
     call = fake.chat.completions.calls[0]
     assert call["model"] == "test-model"
-    assert "response_format" in call
+    assert call["response_format"] == {"type": "json_object"}
 
 
 def test_vision_extractor_retries_on_parse_failure() -> None:
