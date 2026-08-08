@@ -28,8 +28,13 @@ Return a single JSON object matching this schema (omit unknown values as null or
 - purchase_order_variants: other PO number strings visible on the page only
 - line_items: list of {description, quantity, unit_price, amount}
 - subtotal, tax_total, total_amount: numeric amounts when present
+- unmapped_fields: list of {label, value} for every other labeled value printed on
+  the page that fits none of the fields above (e.g. FEIN, account numbers, salesperson,
+  ship-to, comments, tax-status notes)
 
 Rules:
+- Capture as much of the page as possible: anything labeled that does not fit a field
+  above goes into unmapped_fields verbatim; do not silently drop printed information.
 - Transcribe text as printed (OCR noise is acceptable). Do not correct or invent values.
 - vendor_name_variants and purchase_order_variants must be verbatim strings that appear
   somewhere on the page (letterhead, remit-to, footer, stamps). Never invent abbreviations,

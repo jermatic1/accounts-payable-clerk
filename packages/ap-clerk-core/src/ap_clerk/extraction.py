@@ -18,6 +18,13 @@ class LineItem(BaseModel):
     amount: float | None = None
 
 
+class UnmappedField(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    label: str | None = None
+    value: str | None = None
+
+
 class InvoiceExtraction(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
@@ -35,6 +42,7 @@ class InvoiceExtraction(BaseModel):
     subtotal: float | None = None
     tax_total: float | None = None
     total_amount: float | None = None
+    unmapped_fields: list[UnmappedField] = Field(default_factory=list)
 
 
 def check_math(extraction: InvoiceExtraction) -> tuple[bool, str | None]:
