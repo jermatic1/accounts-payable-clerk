@@ -135,10 +135,7 @@ class VisionInvoiceExtractor:
         timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS,
         client: Any | None = None,
     ) -> None:
-        self._api_key = api_key
-        self._base_url = base_url
         self._model = model
-        self._timeout_seconds = timeout_seconds
         if client is not None:
             self._client = client
         else:
@@ -147,14 +144,6 @@ class VisionInvoiceExtractor:
                 base_url=base_url,
                 timeout=timeout_seconds,
             )
-
-    @property
-    def model(self) -> str:
-        return self._model
-
-    @property
-    def base_url(self) -> str:
-        return self._base_url
 
     def extract_invoice(self, image: bytes) -> dict[str, Any]:
         started = time.perf_counter()
@@ -241,19 +230,12 @@ def _is_retryable(exc: BaseException) -> bool:
 
 
 def _is_response_format_error(exc: BaseException) -> bool:
-    status = getattr(exc, "status_code", None)
-    if status not in (400, 404, 422):
-        name = type(exc).__name__
-        if name not in {"BadRequestError", "NotFoundError", "UnprocessableEntityError"}:
-            return False
+    client_error = getattr(exc, "status_code", None) in (400, 404, 422) or type(
+        exc
+    ).__name__ in {"BadRequestError", "NotFoundError", "UnprocessableEntityError"}
+    if not client_error:
+        return False
     text = str(exc).lower()
     return any(
-        token in text
-        for token in (
-            "response_format",
-            "json_schema",
-            "json_object",
-            "structured output",
-            "not supported",
-        )
+        token in text for token in ("response_format", "json_object", "not supported")
     )
