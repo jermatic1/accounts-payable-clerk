@@ -51,6 +51,34 @@ class PipelineResult(BaseModel):
     payload: ResultPayload
 
 
+def _result(
+    status: PipelineStatus,
+    reason: str,
+    *,
+    extraction: InvoiceExtraction | dict[str, Any],
+    source_file: str | None,
+    page_count: int | None,
+    math_ok: bool | None = None,
+    line_sum_ok: bool | None = None,
+    vendor_match: VendorMatch | None = None,
+    po_match: PurchaseOrderMatch | None = None,
+) -> PipelineResult:
+    return PipelineResult(
+        status=status,
+        reason=reason,
+        source_file=source_file,
+        payload=ResultPayload(
+            extraction=extraction,
+            math_ok=math_ok,
+            line_sum_ok=line_sum_ok,
+            reason_code=reason,
+            vendor_match=vendor_match,
+            po_match=po_match,
+            page_count=page_count,
+        ),
+    )
+
+
 def _has_po_text(extraction: InvoiceExtraction) -> bool:
     if extraction.purchase_order_raw and extraction.purchase_order_raw.strip():
         return True
@@ -104,49 +132,37 @@ def process_extraction(
     try:
         extraction = InvoiceExtraction.model_validate(raw)
     except ValidationError:
-        return PipelineResult(
-            status=STATUS_REJECTED,
-            reason=REASON_SCHEMA_INVALID,
+        return _result(
+            STATUS_REJECTED,
+            REASON_SCHEMA_INVALID,
+            extraction=raw,
             source_file=source_file,
-            payload=ResultPayload(
-                extraction=raw,
-                math_ok=None,
-                line_sum_ok=None,
-                reason_code=REASON_SCHEMA_INVALID,
-                page_count=page_count,
-            ),
+            page_count=page_count,
         )
 
     math_ok, math_reason = check_math(extraction)
     if not math_ok:
         assert math_reason is not None
-        return PipelineResult(
-            status=STATUS_HUMAN_REVIEW,
-            reason=math_reason,
+        return _result(
+            STATUS_HUMAN_REVIEW,
+            math_reason,
+            extraction=extraction,
             source_file=source_file,
-            payload=ResultPayload(
-                extraction=extraction,
-                math_ok=False,
-                line_sum_ok=None,
-                reason_code=math_reason,
-                page_count=page_count,
-            ),
+            page_count=page_count,
+            math_ok=False,
         )
 
     line_sum_ok, line_sum_reason = check_line_sum(extraction)
     if not line_sum_ok:
         assert line_sum_reason is not None
-        return PipelineResult(
-            status=STATUS_HUMAN_REVIEW,
-            reason=line_sum_reason,
+        return _result(
+            STATUS_HUMAN_REVIEW,
+            line_sum_reason,
+            extraction=extraction,
             source_file=source_file,
-            payload=ResultPayload(
-                extraction=extraction,
-                math_ok=True,
-                line_sum_ok=False,
-                reason_code=line_sum_reason,
-                page_count=page_count,
-            ),
+            page_count=page_count,
+            math_ok=True,
+            line_sum_ok=False,
         )
 
     vendor_match = match_vendor(
@@ -187,19 +203,16 @@ def _route(
     page_count: int | None = None,
 ) -> PipelineResult:
     def result(status: PipelineStatus, reason: str) -> PipelineResult:
-        return PipelineResult(
-            status=status,
-            reason=reason,
+        return _result(
+            status,
+            reason,
+            extraction=extraction,
             source_file=source_file,
-            payload=ResultPayload(
-                extraction=extraction,
-                math_ok=math_ok,
-                line_sum_ok=line_sum_ok,
-                reason_code=reason,
-                vendor_match=vendor_match,
-                po_match=po_match,
-                page_count=page_count,
-            ),
+            page_count=page_count,
+            math_ok=math_ok,
+            line_sum_ok=line_sum_ok,
+            vendor_match=vendor_match,
+            po_match=po_match,
         )
 
     if not _has_po_text(extraction):
