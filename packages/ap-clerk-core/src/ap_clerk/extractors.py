@@ -153,7 +153,7 @@ class VisionInvoiceExtractor:
             result = parse_extraction_response(content)
         except (json.JSONDecodeError, ValidationError, ExtractionError):
             logger.info(
-                "vlm parse failed; retrying once with JSON-only reinforcement model=%s",
+                "parse failed; retrying once with JSON-only reinforcement model=%s",
                 self._model,
             )
             retry_messages = build_extraction_messages(image, reinforce_json=True)
@@ -167,7 +167,7 @@ class VisionInvoiceExtractor:
 
         elapsed_ms = (time.perf_counter() - started) * 1000.0
         logger.info(
-            "vlm extract model=%s latency_ms=%.0f",
+            "extract model=%s latency_ms=%.0f",
             self._model,
             elapsed_ms,
         )
@@ -185,7 +185,7 @@ class VisionInvoiceExtractor:
         except Exception as exc:
             if not _is_response_format_error(exc):
                 raise
-            logger.info("vlm json_object response_format unsupported; plain completion")
+            logger.info("json_object response_format unsupported; plain completion")
             return self._create_with_retry(**kwargs)
 
     def _create_with_retry(self, **kwargs: Any) -> str:
@@ -207,7 +207,7 @@ class VisionInvoiceExtractor:
                 last_exc = exc
                 delay = _RETRY_DELAYS_SECONDS[attempt]
                 logger.info(
-                    "vlm transient error; retrying in %.1fs model=%s",
+                    "transient error; retrying in %.1fs model=%s",
                     delay,
                     self._model,
                 )

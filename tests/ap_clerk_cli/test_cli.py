@@ -7,7 +7,7 @@ from textwrap import dedent
 import pytest
 
 from ap_clerk.errors import APClerkError
-from ap_clerk.vlm import FakeInvoiceExtractor
+from ap_clerk.extractors import FakeInvoiceExtractor
 from ap_clerk_cli.cli import main
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"

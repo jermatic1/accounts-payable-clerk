@@ -7,6 +7,7 @@ from pydantic import BaseModel, ValidationError
 
 from ap_clerk.documents import LoadedInvoice
 from ap_clerk.extraction import InvoiceExtraction, check_line_sum, check_math
+from ap_clerk.extractors import InvoiceExtractor
 from ap_clerk.matching import (
     DEFAULT_MATCH_MARGIN,
     DEFAULT_MATCH_THRESHOLD,
@@ -17,7 +18,6 @@ from ap_clerk.matching import (
 )
 from ap_clerk.purchase_orders import PurchaseOrder
 from ap_clerk.vendors import Vendor
-from ap_clerk.vlm import InvoiceExtractor
 
 STATUS_AUTO_APPROVED: Final = "AUTO_APPROVED"
 STATUS_HUMAN_REVIEW: Final = "HUMAN_REVIEW"

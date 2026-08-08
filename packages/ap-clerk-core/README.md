@@ -24,7 +24,7 @@ uv sync --all-packages
 | `pipeline` | `PipelineResult`, `process_invoice`, `process_extraction` |
 | `purchase_orders` | `PurchaseOrder`, `load_purchase_orders` |
 | `vendors` | `Vendor`, `load_vendors` |
-| `vlm` | `InvoiceExtractor`, `FakeInvoiceExtractor`, `VisionInvoiceExtractor` |
+| `extractors` | `InvoiceExtractor`, `FakeInvoiceExtractor`, `VisionInvoiceExtractor` |
 
 ## Façade
 
@@ -36,7 +36,7 @@ from ap_clerk.documents import load_invoice
 from ap_clerk.pipeline import process_invoice
 from ap_clerk.purchase_orders import load_purchase_orders
 from ap_clerk.vendors import load_vendors
-from ap_clerk.vlm import VisionInvoiceExtractor
+from ap_clerk.extractors import VisionInvoiceExtractor
 
 config = load_config(Path("config.toml"))
 result = process_invoice(

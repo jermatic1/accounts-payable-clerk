@@ -7,8 +7,8 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from ap_clerk.errors import APClerkError
+from ap_clerk.extractors import DEFAULT_TIMEOUT_SECONDS
 from ap_clerk.matching import DEFAULT_MATCH_MARGIN, DEFAULT_MATCH_THRESHOLD
-from ap_clerk.vlm import DEFAULT_TIMEOUT_SECONDS
 
 
 class ConfigError(APClerkError):

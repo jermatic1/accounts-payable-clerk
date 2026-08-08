@@ -9,6 +9,13 @@ import pytest
 from ap_clerk.documents import LoadedInvoice
 from ap_clerk.errors import ExtractionError
 from ap_clerk.extraction import InvoiceExtraction
+from ap_clerk.extractors import (
+    EXTRACTION_INSTRUCTIONS,
+    FakeInvoiceExtractor,
+    VisionInvoiceExtractor,
+    build_extraction_messages,
+    parse_extraction_response,
+)
 from ap_clerk.pipeline import (
     STATUS_AUTO_APPROVED,
     STATUS_HUMAN_REVIEW,
@@ -16,13 +23,6 @@ from ap_clerk.pipeline import (
 )
 from ap_clerk.purchase_orders import load_purchase_orders
 from ap_clerk.vendors import load_vendors
-from ap_clerk.vlm import (
-    EXTRACTION_INSTRUCTIONS,
-    FakeInvoiceExtractor,
-    VisionInvoiceExtractor,
-    build_extraction_messages,
-    parse_extraction_response,
-)
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
 VENDORS_PATH = FIXTURES / "vendors.json"

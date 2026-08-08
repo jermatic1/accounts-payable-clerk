@@ -6,10 +6,10 @@ import pytest
 
 from ap_clerk.config import ConfigError, load_config
 from ap_clerk.documents import load_invoice
+from ap_clerk.extractors import VisionInvoiceExtractor
 from ap_clerk.pipeline import STATUS_AUTO_APPROVED, STATUS_HUMAN_REVIEW, process_invoice
 from ap_clerk.purchase_orders import load_purchase_orders
 from ap_clerk.vendors import load_vendors
-from ap_clerk.vlm import VisionInvoiceExtractor
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
 INVOICE_PDF = FIXTURES / "invoices" / "V001_P0001001.pdf"
