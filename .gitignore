@@ -18,3 +18,5 @@ wheels/
 # Local config
 config*.toml
 !config.example.toml
+
+plans
