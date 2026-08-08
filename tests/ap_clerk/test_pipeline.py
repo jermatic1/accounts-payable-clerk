@@ -2,25 +2,25 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ap_clerk.extraction import (
-    REASON_LINE_SUM_MISMATCH,
-    REASON_MATH_MISMATCH,
-    REASON_TOTALS_INCOMPLETE,
-    InvoiceExtraction,
-)
+from ap_clerk.extraction import InvoiceExtraction, LineItem
 from ap_clerk.matching import PurchaseOrderMatch, VendorMatch
 from ap_clerk.pipeline import (
     REASON_AUTO_APPROVED,
+    REASON_LINE_SUM_MISMATCH,
     REASON_LOW_CONFIDENCE,
     REASON_LOW_CONFIDENCE_PO,
     REASON_LOW_CONFIDENCE_VENDOR,
+    REASON_MATH_MISMATCH,
     REASON_PO_MISSING,
     REASON_SCHEMA_INVALID,
+    REASON_TOTALS_INCOMPLETE,
     REASON_VENDOR_PO_MISMATCH,
     STATUS_AUTO_APPROVED,
     STATUS_HUMAN_REVIEW,
     STATUS_REJECTED,
     _route,
+    check_line_sum,
+    check_math,
     process_extraction,
 )
 from ap_clerk.purchase_orders import PurchaseOrder, load_purchase_orders
@@ -354,3 +354,143 @@ def test_process_result_json_stable() -> None:
     assert dumped["payload"]["po_match"]["purchase_order_id"] == "P0001001"
     assert "candidates" in dumped["payload"]["vendor_match"]
     assert "confident" in dumped["payload"]["vendor_match"]
+
+
+def test_math_pass_with_tax() -> None:
+    extraction = InvoiceExtraction(
+        subtotal=1250.0,
+        tax_total=100.0,
+        total_amount=1350.0,
+    )
+    ok, reason = check_math(extraction)
+    assert ok is True
+    assert reason is None
+
+
+def test_math_pass_without_tax() -> None:
+    extraction = InvoiceExtraction(
+        subtotal=100.0,
+        tax_total=None,
+        total_amount=100.0,
+    )
+    ok, reason = check_math(extraction)
+    assert ok is True
+    assert reason is None
+
+
+def test_math_pass_within_tolerance() -> None:
+    extraction = InvoiceExtraction(
+        subtotal=10.0,
+        tax_total=0.01,
+        total_amount=10.02,
+    )
+    ok, reason = check_math(extraction)
+    assert ok is True
+    assert reason is None
+
+
+def test_math_fail_mismatch() -> None:
+    extraction = InvoiceExtraction(
+        subtotal=500.0,
+        tax_total=45.0,
+        total_amount=540.0,
+    )
+    ok, reason = check_math(extraction)
+    assert ok is False
+    assert reason == REASON_MATH_MISMATCH
+
+
+def test_math_missing_subtotal() -> None:
+    extraction = InvoiceExtraction(
+        subtotal=None,
+        tax_total=10.0,
+        total_amount=100.0,
+    )
+    ok, reason = check_math(extraction)
+    assert ok is False
+    assert reason == REASON_TOTALS_INCOMPLETE
+
+
+def test_math_missing_total() -> None:
+    extraction = InvoiceExtraction(
+        subtotal=100.0,
+        tax_total=10.0,
+        total_amount=None,
+    )
+    ok, reason = check_math(extraction)
+    assert ok is False
+    assert reason == REASON_TOTALS_INCOMPLETE
+
+
+def test_line_sum_pass() -> None:
+    extraction = InvoiceExtraction(
+        subtotal=100.0,
+        total_amount=100.0,
+        line_items=[
+            LineItem(description="a", amount=40.0),
+            LineItem(description="b", amount=60.0),
+        ],
+    )
+    ok, reason = check_line_sum(extraction)
+    assert ok is True
+    assert reason is None
+
+
+def test_line_sum_pass_within_tolerance() -> None:
+    extraction = InvoiceExtraction(
+        subtotal=10.02,
+        total_amount=10.02,
+        line_items=[
+            LineItem(amount=5.0),
+            LineItem(amount=5.0),
+        ],
+    )
+    ok, reason = check_line_sum(extraction)
+    assert ok is True
+    assert reason is None
+
+
+def test_line_sum_mismatch() -> None:
+    extraction = InvoiceExtraction(
+        subtotal=100.0,
+        total_amount=100.0,
+        line_items=[
+            LineItem(amount=40.0),
+            LineItem(amount=50.0),
+        ],
+    )
+    ok, reason = check_line_sum(extraction)
+    assert ok is False
+    assert reason == REASON_LINE_SUM_MISMATCH
+
+
+def test_line_sum_skipped_when_no_line_amounts() -> None:
+    extraction = InvoiceExtraction(
+        subtotal=100.0,
+        total_amount=100.0,
+        line_items=[
+            LineItem(description="no amount"),
+            LineItem(description="also none", amount=None),
+        ],
+    )
+    ok, reason = check_line_sum(extraction)
+    assert ok is True
+    assert reason is None
+
+
+def test_line_sum_skipped_when_no_lines() -> None:
+    extraction = InvoiceExtraction(subtotal=100.0, total_amount=100.0)
+    ok, reason = check_line_sum(extraction)
+    assert ok is True
+    assert reason is None
+
+
+def test_line_sum_skipped_when_subtotal_missing() -> None:
+    extraction = InvoiceExtraction(
+        subtotal=None,
+        total_amount=100.0,
+        line_items=[LineItem(amount=50.0)],
+    )
+    ok, reason = check_line_sum(extraction)
+    assert ok is True
+    assert reason is None

@@ -6,7 +6,7 @@ from typing import Any, Final, Literal
 from pydantic import BaseModel, ValidationError
 
 from ap_clerk.documents import LoadedInvoice
-from ap_clerk.extraction import InvoiceExtraction, check_line_sum, check_math
+from ap_clerk.extraction import InvoiceExtraction
 from ap_clerk.extractors import InvoiceExtractor
 from ap_clerk.matching import (
     DEFAULT_MATCH_MARGIN,
@@ -24,6 +24,9 @@ STATUS_HUMAN_REVIEW: Final = "HUMAN_REVIEW"
 STATUS_REJECTED: Final = "REJECTED"
 
 REASON_SCHEMA_INVALID = "SCHEMA_INVALID"
+REASON_MATH_MISMATCH = "MATH_MISMATCH"
+REASON_LINE_SUM_MISMATCH = "LINE_SUM_MISMATCH"
+REASON_TOTALS_INCOMPLETE = "TOTALS_INCOMPLETE"
 REASON_PO_MISSING = "PO_MISSING"
 REASON_VENDOR_PO_MISMATCH = "VENDOR_PO_MISMATCH"
 REASON_LOW_CONFIDENCE_VENDOR = "LOW_CONFIDENCE_VENDOR"
@@ -32,6 +35,32 @@ REASON_LOW_CONFIDENCE = "LOW_CONFIDENCE"
 REASON_AUTO_APPROVED = "AUTO_APPROVED"
 
 PipelineStatus = Literal["AUTO_APPROVED", "HUMAN_REVIEW", "REJECTED"]
+
+MATH_TOLERANCE = 0.02
+
+
+def check_math(extraction: InvoiceExtraction) -> tuple[bool, str | None]:
+    if extraction.subtotal is None or extraction.total_amount is None:
+        return False, REASON_TOTALS_INCOMPLETE
+
+    tax = extraction.tax_total if extraction.tax_total is not None else 0.0
+    calculated = round(extraction.subtotal + tax, 2)
+    reported = round(extraction.total_amount, 2)
+    if abs(calculated - reported) > MATH_TOLERANCE:
+        return False, REASON_MATH_MISMATCH
+    return True, None
+
+
+def check_line_sum(extraction: InvoiceExtraction) -> tuple[bool, str | None]:
+    amounts = [item.amount for item in extraction.line_items if item.amount is not None]
+    if not amounts or extraction.subtotal is None:
+        return True, None
+
+    line_total = round(sum(amounts), 2)
+    subtotal = round(extraction.subtotal, 2)
+    if abs(line_total - subtotal) > MATH_TOLERANCE:
+        return False, REASON_LINE_SUM_MISMATCH
+    return True, None
 
 
 class ResultPayload(BaseModel):

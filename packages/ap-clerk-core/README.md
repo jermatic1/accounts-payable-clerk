@@ -19,9 +19,9 @@ uv sync --all-packages
 | `config` | `Config`, `load_config` from `config.toml` |
 | `documents` | `LoadedInvoice`, `load_invoice` (first PDF page rendered to PNG) |
 | `errors` | `APClerkError`, `ExtractionError` |
-| `extraction` | `InvoiceExtraction`, `LineItem`, math / line-sum checks |
+| `extraction` | `InvoiceExtraction`, `LineItem`, `UnmappedField` (pure data models) |
 | `matching` | Vendor and purchase-order fuzzy match |
-| `pipeline` | `PipelineResult`, `process_invoice`, `process_extraction` |
+| `pipeline` | `PipelineResult`, `process_invoice`, `process_extraction`, math / line-sum checks, statuses and reason codes |
 | `purchase_orders` | `PurchaseOrder`, `load_purchase_orders` |
 | `vendors` | `Vendor`, `load_vendors` |
 | `extractors` | `InvoiceExtractor`, `FakeInvoiceExtractor`, `VisionInvoiceExtractor` |

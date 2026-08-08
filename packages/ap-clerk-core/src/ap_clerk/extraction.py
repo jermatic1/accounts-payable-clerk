@@ -2,12 +2,6 @@ from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict, Field
 
-MATH_TOLERANCE = 0.02
-
-REASON_MATH_MISMATCH = "MATH_MISMATCH"
-REASON_LINE_SUM_MISMATCH = "LINE_SUM_MISMATCH"
-REASON_TOTALS_INCOMPLETE = "TOTALS_INCOMPLETE"
-
 
 class LineItem(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -43,27 +37,3 @@ class InvoiceExtraction(BaseModel):
     tax_total: float | None = None
     total_amount: float | None = None
     unmapped_fields: list[UnmappedField] = Field(default_factory=list)
-
-
-def check_math(extraction: InvoiceExtraction) -> tuple[bool, str | None]:
-    if extraction.subtotal is None or extraction.total_amount is None:
-        return False, REASON_TOTALS_INCOMPLETE
-
-    tax = extraction.tax_total if extraction.tax_total is not None else 0.0
-    calculated = round(extraction.subtotal + tax, 2)
-    reported = round(extraction.total_amount, 2)
-    if abs(calculated - reported) > MATH_TOLERANCE:
-        return False, REASON_MATH_MISMATCH
-    return True, None
-
-
-def check_line_sum(extraction: InvoiceExtraction) -> tuple[bool, str | None]:
-    amounts = [item.amount for item in extraction.line_items if item.amount is not None]
-    if not amounts or extraction.subtotal is None:
-        return True, None
-
-    line_total = round(sum(amounts), 2)
-    subtotal = round(extraction.subtotal, 2)
-    if abs(line_total - subtotal) > MATH_TOLERANCE:
-        return False, REASON_LINE_SUM_MISMATCH
-    return True, None
